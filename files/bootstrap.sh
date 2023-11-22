@@ -38,6 +38,8 @@ function print_help {
   echo "--pause-container-version The tag of the pause container"
   echo "--service-ipv6-cidr ipv6 cidr range of the cluster"
   echo "--use-max-pods Sets --max-pods for the kubelet when true. (default: true)"
+  echo "--aws-emulated-region The emulated AWS region to use for AWS API calls. (default: use imds)"
+  echo "--aws-emulated-domain The AWS emulated domain to use for AWS API calls. (default: use imds)"
 }
 
 function log {
@@ -163,6 +165,18 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
+    --aws-default-region)
+      AWS_EMULATED_REGION=$2
+      log "INFO: --aws-emulated-region='${AWS_EMULATED_REGION}'"
+      shift
+      shift
+      ;;
+    --aws-services-domain)
+      AWS_EMULATED_DOMAIN=$2
+      log "INFO: --aws-emulated-domain='${AWS_EMULATED_DOMAIN}'"
+      shift
+      shift
+      ;;
     *)                   # unknown option
       POSITIONAL+=("$1") # save it in an array for later
       shift              # past argument
@@ -221,6 +235,8 @@ SERVICE_IPV6_CIDR="${SERVICE_IPV6_CIDR:-}"
 ENABLE_LOCAL_OUTPOST="${ENABLE_LOCAL_OUTPOST:-}"
 CLUSTER_ID="${CLUSTER_ID:-}"
 LOCAL_DISKS="${LOCAL_DISKS:-}"
+AWS_EMULATED_REGION="${AWS_EMULATED_REGION:-}"
+AWS_EMULATED_DOMAIN="${AWS_EMULATED_DOMAIN:-}"
 
 ##allow --reserved-cpus options via kubelet arg directly. Disable default reserved cgroup option in such cases
 USE_RESERVED_CGROUPS=true
@@ -318,7 +334,18 @@ if [[ ! -z "${SERVICE_IPV6_CIDR}" ]]; then
 fi
 
 AWS_DEFAULT_REGION=$(imds 'latest/dynamic/instance-identity/document' | jq .region -r)
+
+if [[ ! -z "${AWS_EMULATED_REGION}" ]]; then
+  AWS_EMULATED_REGION=$AWS_DEFAULT_REGION
+fi
+
 AWS_SERVICES_DOMAIN=$(imds 'latest/meta-data/services/domain')
+
+if [[ ! -z "${AWS_EMULATED_DOMAIN}" ]]; then
+  AWS_EMULATED_DOMAIN=$AWS_SERVICES_DOMAIN
+fi
+
+
 
 MACHINE=$(uname -m)
 if [[ "$MACHINE" != "x86_64" && "$MACHINE" != "aarch64" ]]; then
@@ -335,7 +362,7 @@ chown root:root /etc/systemd/system/configure-clocksource.service
 systemctl daemon-reload
 systemctl enable --now configure-clocksource
 
-ECR_URI=$(/etc/eks/get-ecr-uri.sh "${AWS_DEFAULT_REGION}" "${AWS_SERVICES_DOMAIN}" "${PAUSE_CONTAINER_ACCOUNT:-}")
+ECR_URI=$(/etc/eks/get-ecr-uri.sh "${AWS_EMULATED_REGION}" "${AWS_EMULATED_DOMAIN}" "${PAUSE_CONTAINER_ACCOUNT:-}")
 PAUSE_CONTAINER_IMAGE=${PAUSE_CONTAINER_IMAGE:-$ECR_URI/eks/pause}
 PAUSE_CONTAINER="$PAUSE_CONTAINER_IMAGE:$PAUSE_CONTAINER_VERSION"
 
@@ -356,11 +383,11 @@ if [[ -z "${B64_CLUSTER_CA}" ]] || [[ -z "${APISERVER_ENDPOINT}" ]]; then
     fi
 
     aws eks wait cluster-active \
-      --region=${AWS_DEFAULT_REGION} \
+      --region=${AWS_EMULATED_REGION} \
       --name=${CLUSTER_NAME}
 
     aws eks describe-cluster \
-      --region=${AWS_DEFAULT_REGION} \
+      --region=${AWS_EMULATED_REGION} \
       --name=${CLUSTER_NAME} \
       --output=text \
       --query 'cluster.{certificateAuthorityData: certificateAuthority.data, endpoint: endpoint, serviceIpv4Cidr: kubernetesNetworkConfig.serviceIpv4Cidr, serviceIpv6Cidr: kubernetesNetworkConfig.serviceIpv6Cidr, clusterIpFamily: kubernetesNetworkConfig.ipFamily, outpostArn: outpostConfig.outpostArns[0], id: id}' > $DESCRIBE_CLUSTER_RESULT || rc=$?

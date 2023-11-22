@@ -123,7 +123,7 @@ sudo mv $WORKING_DIR/iptables-restore.service /etc/eks/iptables-restore.service
 ################################################################################
 
 sudo mv $WORKING_DIR/shift-ca.pem /etc/pki/ca-trust/source/anchors/
-sudo update-ca-trust
+sudo update-ca-trust --extract
 
 ################################################################################
 ### IMDS emulator ##############################################################
