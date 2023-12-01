@@ -165,13 +165,13 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    --aws-default-region)
+    --aws-emulated-region)
       AWS_EMULATED_REGION=$2
       log "INFO: --aws-emulated-region='${AWS_EMULATED_REGION}'"
       shift
       shift
       ;;
-    --aws-services-domain)
+    --aws-emulated-domain)
       AWS_EMULATED_DOMAIN=$2
       log "INFO: --aws-emulated-domain='${AWS_EMULATED_DOMAIN}'"
       shift
