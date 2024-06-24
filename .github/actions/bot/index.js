@@ -127,7 +127,7 @@ function buildCommand(uuid, payload, name, args) {
 // The format of a command is `+NAME ARGS...`.
 // Leading and trailing spaces are ignored.
 function parseNamedArguments(line) {
-    const parsed = line.trim().match(/^\+([a-z\-]+)(?:\s+(.+))?$/);
+    const parsed = line.trim().match(/^\+([a-z\-]+(?::[a-z\-\d_]+)?)(?:\s+(.+))?$/);
     if (parsed) {
         return {
             name: parsed[1],
@@ -148,6 +148,7 @@ class EchoCommand {
 }
 
 class CICommand {
+    workflow_goal_prefix = "workflow:";
     constructor(uuid, payload, args) {
         this.repository_owner = payload.repository.owner.login;
         this.repository_name = payload.repository.name;
@@ -156,7 +157,7 @@ class CICommand {
         this.uuid = uuid;
         this.goal = "test";
         // "test" goal, which executes all CI stages, is the default when no goal is specified
-        if (args != null && args != "") {
+        if (args != null && args !== "") {
             this.goal = args;
         }
         this.goal_args = {};
@@ -164,6 +165,40 @@ class CICommand {
 
     addNamedArguments(goal, args) {
         this.goal_args[goal] = args;
+    }
+
+    // a map of file path prefixes to OS distros that are associated with the file paths
+    // a value of "*" implies multiple OS distros are associated with the path, and we should just rely on the workflow's default
+    osDistroPathPrefixHints = {
+        "templates/al2/": "al2",
+        "templates/al2023/": "al2023",
+        "templates/shared/": "*",
+        "nodeadm/": "al2023",
+    };
+
+    async guessOsDistrosForChangedFiles(github) {
+        const files = await github.rest.pulls.listFiles({
+            owner: this.repository_owner,
+            repo: this.repository_name,
+            pull_number: this.pr_number
+        });
+        const osDistros = [];
+        for (const file of files.data) {
+            for (const prefix of osDistroPathPrefixHints) {
+                if (file.filename.startsWith(prefix)) {
+                    const osDistro = this.osDistroPathPrefixHints[prefix];
+                    osDistros.push(osDistro);
+                }
+            }
+        }
+        if (osDistros.includes('*')) {
+            console.log("changed files matched a prefix mapped to the wildcard, not attempting to guess os_distros!");
+            return null;
+        }
+        if (osDistros.length == 0) {
+            return null;
+        }
+        return osDistros.join(',');
     }
 
     async run(author, github) {
@@ -191,14 +226,24 @@ class CICommand {
             comment_url: this.comment_url
         };
         for (const [goal, args] of Object.entries(this.goal_args)) {
-            inputs[`${goal}_arguments`] = args;
+            if (goal.startsWith(this.workflow_goal_prefix)) {
+                inputs[goal.substring(this.workflow_goal_prefix.length)] = args;
+            } else {
+                inputs[`${goal}_arguments`] = args;
+            }
+        }
+        if (!inputs.hasOwnProperty('os_distros')) {
+            const osDistros = await this.guessOsDistrosForChangedFiles(github);
+            if (osDistros != null) {
+                inputs['os_distros'] = osDistros;
+            }
         }
         console.log(`Dispatching workflow with inputs: ${JSON.stringify(inputs)}`);
         await github.rest.actions.createWorkflowDispatch({
             owner: this.repository_owner,
             repo: this.repository_name,
             workflow_id: 'ci-manual.yaml',
-            ref: 'master',
+            ref: 'main',
             inputs: inputs
         });
         return null;
