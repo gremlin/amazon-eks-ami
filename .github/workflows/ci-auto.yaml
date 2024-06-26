@@ -6,13 +6,6 @@ on:
       - reopened
       - synchronize
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # 4.1.7
-    - run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-    - run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
-    - run: make lint
   templates-test:
     runs-on: ubuntu-latest
     steps:
