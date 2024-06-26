@@ -30,9 +30,6 @@ else
     us-iso-west-1)
       acct="608367168043"
       ;;
-    us-iso-east-1)
-      acct="725322719131"
-      ;;
     us-isob-east-1)
       acct="187977181151"
       ;;
@@ -85,7 +82,8 @@ else
       us-east-1 | \
       us-east-2 | \
       us-west-1 | \
-      us-west-2)
+      us-west-2 | \
+      us-iso-east-1)
       acct="602401143452"
       ;;
     # If the region is not mapped to an account, let's try to choose another region
@@ -99,7 +97,7 @@ else
       region="cn-northwest-1"
       ;;
     us-iso-*)
-      acct="725322719131"
+      acct="602401143452"
       region="us-iso-east-1"
       ;;
     us-isob-*)
