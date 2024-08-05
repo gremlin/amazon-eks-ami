@@ -205,17 +205,17 @@ sudo mv $ECR_CREDENTIAL_PROVIDER_BINARY /etc/eks/image-credential-provider/
 ### SSM Agent ##################################################################
 ################################################################################
 
-if dnf list installed | grep amazon-ssm-agent; then
-  echo "amazon-ssm-agent already present - skipping install"
-else
-  if ! [[ -z "${SSM_AGENT_VERSION}" ]]; then
-    echo "Installing amazon-ssm-agent@${SSM_AGENT_VERSION} from S3"
-    sudo dnf install -y https://s3.${BINARY_BUCKET_REGION}.${S3_DOMAIN}/amazon-ssm-${BINARY_BUCKET_REGION}/${SSM_AGENT_VERSION}/linux_${ARCH}/amazon-ssm-agent.rpm
-  else
-    echo "Installing amazon-ssm-agent from AL core repository"
-    sudo dnf install -y amazon-ssm-agent
-  fi
-fi
+# if dnf list installed | grep amazon-ssm-agent; then
+#   echo "amazon-ssm-agent already present - skipping install"
+# else
+#   if ! [[ -z "${SSM_AGENT_VERSION}" ]]; then
+#     echo "Installing amazon-ssm-agent@${SSM_AGENT_VERSION} from S3"
+#     sudo dnf install -y https://s3.${BINARY_BUCKET_REGION}.${S3_DOMAIN}/amazon-ssm-${BINARY_BUCKET_REGION}/${SSM_AGENT_VERSION}/linux_${ARCH}/amazon-ssm-agent.rpm
+#   else
+#     echo "Installing amazon-ssm-agent from AL core repository"
+#     sudo dnf install -y amazon-ssm-agent
+#   fi
+# fi
 
 ################################################################################
 ### AMI Metadata ###############################################################

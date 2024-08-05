@@ -489,17 +489,17 @@ fi
 ### SSM Agent ##################################################################
 ################################################################################
 
-if yum list installed | grep amazon-ssm-agent; then
-  echo "amazon-ssm-agent already present - skipping install"
-else
-  if ! [[ -z "${SSM_AGENT_VERSION}" ]]; then
-    echo "Installing amazon-ssm-agent@${SSM_AGENT_VERSION} from S3"
-    sudo yum install -y https://s3.${BINARY_BUCKET_REGION}.${S3_DOMAIN}/amazon-ssm-${BINARY_BUCKET_REGION}/${SSM_AGENT_VERSION}/linux_${ARCH}/amazon-ssm-agent.rpm
-  else
-    echo "Installing amazon-ssm-agent from AL core repository"
-    sudo yum install -y amazon-ssm-agent
-  fi
-fi
+# if yum list installed | grep amazon-ssm-agent; then
+#   echo "amazon-ssm-agent already present - skipping install"
+# else
+#   if ! [[ -z "${SSM_AGENT_VERSION}" ]]; then
+#     echo "Installing amazon-ssm-agent@${SSM_AGENT_VERSION} from S3"
+#     sudo yum install -y https://s3.${BINARY_BUCKET_REGION}.${S3_DOMAIN}/amazon-ssm-${BINARY_BUCKET_REGION}/${SSM_AGENT_VERSION}/linux_${ARCH}/amazon-ssm-agent.rpm
+#   else
+#     echo "Installing amazon-ssm-agent from AL core repository"
+#     sudo yum install -y amazon-ssm-agent
+#   fi
+# fi
 
 ################################################################################
 ### AMI Metadata ###############################################################

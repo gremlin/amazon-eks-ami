@@ -5,7 +5,6 @@ After=docker.service iptables-restore.service
 Requires=docker.service
 
 [Service]
-Environment='AWS_EC2_METADATA_SERVICE_ENDPOINT=http://localhost:1338'
 ExecStartPre=/sbin/iptables -P FORWARD ACCEPT -w 5
 ExecStart=/usr/bin/kubelet \
     --config /etc/kubernetes/kubelet/kubelet-config.json \
@@ -16,7 +15,6 @@ ExecStart=/usr/bin/kubelet \
     --image-credential-provider-bin-dir /etc/eks/image-credential-provider \
     $KUBELET_ARGS \
     $KUBELET_EXTRA_ARGS
-
 Restart=always
 RestartSec=5
 KillMode=process

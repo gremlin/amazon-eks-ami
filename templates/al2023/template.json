@@ -14,6 +14,7 @@
     "aws_session_token": null,
     "binary_bucket_name": null,
     "binary_bucket_region": null,
+    "cache_shift_container_images": null,
     "containerd_version": null,
     "creator": null,
     "enable_fips": null,
@@ -194,6 +195,20 @@
       "script": "{{template_dir}}/provisioners/install-nodeadm.sh",
       "environment_vars": [
         "PROJECT_DIR={{user `working_dir`}}/nodeadm"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{ user `remote_folder`}}",
+      "script": "{{template_dir}}/../shared/provisioners/configure-shift.sh",
+      "environment_vars": [
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key_id`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_access_key`}}",
+        "AWS_SESSION_TOKEN={{user `aws_session_token`}}",
+        "BINARY_BUCKET_REGION={{user `binary_bucket_region`}}",
+        "CACHE_SHIFT_CONTAINER_IMAGES={{user `cache_shift_container_images`}}",
+        "KUBERNETES_VERSION={{user `kubernetes_version`}}",
+        "WORKING_DIR={{user `working_dir`}}"
       ]
     },
     {

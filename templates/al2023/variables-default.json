@@ -10,6 +10,7 @@
     "aws_session_token": "{{env `AWS_SESSION_TOKEN`}}",
     "binary_bucket_name": "amazon-eks",
     "binary_bucket_region": "us-west-2",
+    "cache_shift_container_images": "false",
     "containerd_version": "*",
     "creator": "{{env `USER`}}",
     "enable_fips": "false",

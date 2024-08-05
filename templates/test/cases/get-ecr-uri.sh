@@ -64,8 +64,9 @@ if [ ! "$ECR_URI" = "$EXPECTED_ECR_URI" ]; then
   exit 1
 fi
 
+# Modified account for SHIFT emulated environment
 echo "--> Should default us-iso-east-1 when unknown amazonaws.com.iso region"
-EXPECTED_ECR_URI="725322719131.dkr.ecr.us-iso-east-1.amazonaws.com.iso"
+EXPECTED_ECR_URI="602401143452.dkr.ecr.us-iso-east-1.amazonaws.com.iso"
 REGION="us-iso-west-100"
 DOMAIN="amazonaws.com.iso"
 ECR_URI=$(/etc/eks/get-ecr-uri.sh "${REGION}" "${DOMAIN}")

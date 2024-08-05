@@ -16,6 +16,7 @@
     "binary_bucket_name": null,
     "binary_bucket_region": null,
     "cache_container_images": null,
+    "cache_shift_container_images": null,
     "cni_plugin_version": null,
     "containerd_version": null,
     "creator": null,
@@ -205,6 +206,19 @@
         "PULL_CNI_FROM_GITHUB={{user `pull_cni_from_github`}}",
         "RUNC_VERSION={{user `runc_version`}}",
         "SSM_AGENT_VERSION={{user `ssm_agent_version`}}",
+        "WORKING_DIR={{user `working_dir`}}"
+      ]
+    },
+    {
+      "type": "shell",
+      "remote_folder": "{{ user `remote_folder`}}",
+      "script": "{{template_dir}}/../shared/provisioners/configure-shift.sh",
+      "environment_vars": [
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key_id`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_access_key`}}",
+        "AWS_SESSION_TOKEN={{user `aws_session_token`}}",
+        "CACHE_SHIFT_CONTAINER_IMAGES={{user `cache_shift_container_images`}}",
+        "KUBERNETES_VERSION={{user `kubernetes_version`}}",
         "WORKING_DIR={{user `working_dir`}}"
       ]
     },
