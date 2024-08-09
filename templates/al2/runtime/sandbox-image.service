@@ -7,6 +7,7 @@ Requires=containerd.service
 [Service]
 Type=oneshot
 ExecStart=/etc/eks/containerd/pull-sandbox-image.sh
+Environment="AWS_CA_BUNDLE=/etc/pki/ca-trust/source/anchors/shift-ca.pem"
 
 [Install]
 WantedBy=multi-user.target
