@@ -56,6 +56,34 @@ Environment='AWS_EC2_METADATA_SERVICE_ENDPOINT=http://localhost:1338'
 EOF
 
 ################################################################################
+### Remove SSM #################################################################
+################################################################################
+
+# Determine the package manager
+if command -v dnf >/dev/null 2>&1; then
+  PACKAGE_MANAGER="dnf"
+elif command -v yum >/dev/null 2>&1; then
+  PACKAGE_MANAGER="yum"
+else
+  echo "Neither dnf nor yum found. Aborting."
+  exit 1
+fi
+
+# Check if amazon-ssm-agent is installed
+if $PACKAGE_MANAGER list installed amazon-ssm-agent >/dev/null 2>&1; then
+  echo "Removing SSM agent"
+
+  # Stop & disable the SSM agent service
+  sudo systemctl stop amazon-ssm-agent
+  sudo systemctl disable amazon-ssm-agent
+
+  # Remove the SSM agent package
+  sudo $PACKAGE_MANAGER remove amazon-ssm-agent -y -q 
+else
+  echo "SSM agent is not installed."
+fi
+
+################################################################################
 ### Cache Images ###############################################################
 ################################################################################
 
